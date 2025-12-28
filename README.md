@@ -29,9 +29,11 @@ DB_CONN_TIMEOUT_MS=2000
 DB_SSL=false
 DB_LOG_QUERIES=false
 BETTER_AUTH_BASE_URL=http://localhost:3000
-BETTER_AUTH_SECRET=change-me
-BETTER_AUTH_ISSUER=savant-be
-BETTER_AUTH_AUDIENCE=savant-clients
+BETTER_AUTH_BASE_PATH=/auth
+BETTER_AUTH_SECRET=change-me-change-me-change-me-123456
+BETTER_AUTH_JWT_ISSUER=savant-be
+BETTER_AUTH_JWT_AUDIENCE=savant-clients
+BETTER_AUTH_JWT_ACCESS_TTL=15m
 ```
 
 ## Database
@@ -49,6 +51,26 @@ Generate and apply migrations:
 pnpm db:generate
 pnpm db:push
 ```
+
+## Better Auth
+
+Better Auth is wired with the Drizzle adapter and JWT plugin. The auth handler is mounted at `/auth` and uses the configuration in `auth.ts` (root) for CLI compatibility.
+
+Generate the Better Auth schema for Drizzle:
+
+```bash
+pnpm auth:generate
+```
+
+Auth endpoints (served by Better Auth):
+
+- `POST /auth/sign-up/email`
+- `POST /auth/sign-in/email`
+- `POST /auth/sign-out`
+- `GET /auth/jwks`
+- `GET /auth/token`
+
+Note: `BETTER_AUTH_SECRET` must be at least 32 characters. You can generate one with `pnpm auth:secret`.
 
 ## Running the app
 
@@ -71,9 +93,9 @@ Base URL: `http://localhost:3000`
 - `DELETE /users/:id` -> soft delete by default
 - `DELETE /users/:id?hard=true` -> hard delete
 
-## Auth (future)
+## Auth
 
-Better Auth is not wired yet, but configuration is scaffolded in `src/auth`. Env vars are included to avoid refactors later.
+Better Auth is wired in `src/auth` and mounted at `/auth` via the Nest controller. Env vars in `.env` configure the handler and JWT plugin.
 
 ## Testing
 

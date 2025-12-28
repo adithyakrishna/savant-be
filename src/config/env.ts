@@ -16,9 +16,11 @@ export const envSchema = z.object({
   DB_SSL: booleanString,
   DB_LOG_QUERIES: booleanString,
   BETTER_AUTH_BASE_URL: z.string().url().optional().or(z.literal('')),
-  BETTER_AUTH_SECRET: z.string().min(1).optional(),
-  BETTER_AUTH_ISSUER: z.string().min(1).optional(),
-  BETTER_AUTH_AUDIENCE: z.string().min(1).optional(),
+  BETTER_AUTH_BASE_PATH: z.string().min(1).default('/auth'),
+  BETTER_AUTH_SECRET: z.string().min(32),
+  BETTER_AUTH_JWT_ISSUER: z.string().min(1).default('savant-be'),
+  BETTER_AUTH_JWT_AUDIENCE: z.string().min(1).default('savant-clients'),
+  BETTER_AUTH_JWT_ACCESS_TTL: z.string().min(1).default('15m'),
 });
 
 export type Env = z.infer<typeof envSchema>;

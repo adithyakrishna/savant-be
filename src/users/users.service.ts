@@ -4,8 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto, User } from './users.types';
-import { UsersRepository } from './users.repository';
+import { CreateUserDto, UpdateUserDto, User } from '@/users/users.types';
+import { UsersRepository } from '@/users/users.repository';
 
 @Injectable()
 export class UsersService {
@@ -43,11 +43,18 @@ export class UsersService {
       throw new BadRequestException('Name cannot be empty');
     }
 
-    const updated = await this.usersRepository.update(id, payload);
-    if (!updated) {
-      throw new NotFoundException(`User ${id} not found`);
+    try {
+      const updated = await this.usersRepository.update(id, payload);
+      if (!updated) {
+        throw new NotFoundException(`User ${id} not found`);
+      }
+      return updated;
+    } catch (error) {
+      if (error instanceof Error && error.message === 'EMAIL_EXISTS') {
+        throw new ConflictException('Email already exists');
+      }
+      throw error;
     }
-    return updated;
   }
 
   async deleteOne(

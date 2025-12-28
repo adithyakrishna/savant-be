@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { Env } from '../config/env';
-import { DatabaseService } from './db.service';
-import { DRIZZLE_DB, PG_POOL } from './db.constants';
-import * as schema from './schema';
+import { Env } from '@/config/env';
+import { DatabaseService } from '@/db/db.service';
+import { DRIZZLE_DB, PG_POOL } from '@/db/db.constants';
+import * as schema from '@/db/schema';
 
 @Module({
   imports: [ConfigModule],

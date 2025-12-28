@@ -1,17 +1,26 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Env } from '../config/env';
+import { Inject, Injectable } from '@nestjs/common';
+import type { Auth } from 'better-auth';
+import type { IncomingMessage, ServerResponse } from 'http';
+import { AUTH_INSTANCE } from '@/auth/auth.constants';
 
 @Injectable()
-export class AuthConfigService {
-  constructor(private readonly configService: ConfigService<Env, true>) {}
+export class AuthService {
+  private handler?: (req: IncomingMessage, res: ServerResponse) => Promise<void> | void;
 
-  get betterAuth() {
-    return {
-      baseUrl: this.configService.get('BETTER_AUTH_BASE_URL', { infer: true }),
-      secret: this.configService.get('BETTER_AUTH_SECRET', { infer: true }),
-      issuer: this.configService.get('BETTER_AUTH_ISSUER', { infer: true }),
-      audience: this.configService.get('BETTER_AUTH_AUDIENCE', { infer: true }),
-    };
+  constructor(@Inject(AUTH_INSTANCE) private readonly auth: Auth) {}
+
+  private async getHandler(): Promise<
+    (req: IncomingMessage, res: ServerResponse) => Promise<void> | void
+  > {
+    if (!this.handler) {
+      const { toNodeHandler } = await import('better-auth/node');
+      this.handler = toNodeHandler(this.auth);
+    }
+    return this.handler;
+  }
+
+  async handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
+    const handler = await this.getHandler();
+    await handler(req, res);
   }
 }

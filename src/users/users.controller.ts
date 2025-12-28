@@ -8,8 +8,10 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import type { CreateUserDto, UpdateUserDto } from './users.types';
+import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
+import { UsersService } from '@/users/users.service';
+import type { CreateUserDto, UpdateUserDto } from '@/users/users.types';
+import { createUserSchema, updateUserSchema } from '@/users/users.types';
 
 @Controller('users')
 export class UsersController {
@@ -26,12 +28,15 @@ export class UsersController {
   }
 
   @Post()
-  createUser(@Body() body: CreateUserDto) {
+  createUser(@Body(new ZodValidationPipe(createUserSchema)) body: CreateUserDto) {
     return this.usersService.createOne(body);
   }
 
   @Patch(':id')
-  updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
+  updateUser(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(updateUserSchema)) body: UpdateUserDto,
+  ) {
     return this.usersService.updateOne(id, body);
   }
 

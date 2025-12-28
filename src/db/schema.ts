@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   pgTable,
@@ -22,6 +23,10 @@ export const users = pgTable(
       .defaultNow(),
   },
   (table) => ({
-    usersEmailUnique: uniqueIndex('users_email_unique').on(table.email),
+    usersEmailUnique: uniqueIndex('users_email_unique')
+      .on(table.email)
+      .where(sql`${table.deleted} = false`),
   }),
 );
+
+export * from '@/auth/better-auth.schema';

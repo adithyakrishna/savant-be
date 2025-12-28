@@ -2,15 +2,128 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '@/app.module';
+import { UsersRepository } from '@/users/users.repository';
+import { AUTH_INSTANCE } from '@/auth/auth.constants';
+import type {
+  CreateUserDto,
+  UpdateUserDto,
+  User,
+} from '@/users/users.types';
+
+const createId = () => Math.random().toString(36).slice(2, 10).padEnd(8, '0');
+
+const buildInMemoryUsersRepository = () => {
+  const store = new Map<string, User>();
+
+  const normalizeEmail = (email?: string | null): string | null => {
+    if (email === undefined || email === null) {
+      return null;
+    }
+
+    const trimmed = email.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  };
+
+  const ensureEmailUnique = (email: string, excludeId?: string) => {
+    for (const user of store.values()) {
+      if (user.deleted) {
+        continue;
+      }
+      if (user.email === email && user.id !== excludeId) {
+        throw new Error('EMAIL_EXISTS');
+      }
+    }
+  };
+
+  return {
+    async create(payload: CreateUserDto): Promise<User> {
+      const normalizedEmail = normalizeEmail(payload.email);
+
+      if (normalizedEmail) {
+        ensureEmailUnique(normalizedEmail);
+      }
+
+      const now = new Date();
+      const user: User = {
+        id: createId(),
+        name: payload.name,
+        email: normalizedEmail,
+        deleted: false,
+        createdAt: now,
+        updatedAt: now,
+      };
+      store.set(user.id, user);
+      return user;
+    },
+    async findAll(includeDeleted: boolean): Promise<User[]> {
+      const users = Array.from(store.values());
+      return includeDeleted ? users : users.filter((user) => !user.deleted);
+    },
+    async findById(id: string): Promise<User | undefined> {
+      const user = store.get(id);
+      if (!user || user.deleted) {
+        return undefined;
+      }
+      return user;
+    },
+    async update(id: string, payload: UpdateUserDto): Promise<User | undefined> {
+      const user = store.get(id);
+      if (!user || user.deleted) {
+        return undefined;
+      }
+
+      let email = user.email;
+      if (payload.email !== undefined) {
+        const normalizedEmail = normalizeEmail(payload.email);
+        if (normalizedEmail) {
+          ensureEmailUnique(normalizedEmail, id);
+        }
+        email = normalizedEmail;
+      }
+
+      const updated: User = {
+        ...user,
+        name: payload.name ?? user.name,
+        email,
+        updatedAt: new Date(),
+      };
+      store.set(id, updated);
+      return updated;
+    },
+    async softDelete(id: string): Promise<User | undefined> {
+      const user = store.get(id);
+      if (!user || user.deleted) {
+        return undefined;
+      }
+      const updated: User = { ...user, deleted: true, updatedAt: new Date() };
+      store.set(id, updated);
+      return updated;
+    },
+    async hardDelete(id: string): Promise<User | undefined> {
+      const user = store.get(id);
+      if (!user) {
+        return undefined;
+      }
+      store.delete(id);
+      return user;
+    },
+  };
+};
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
+    const usersRepository = buildInMemoryUsersRepository();
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(UsersRepository)
+      .useValue(usersRepository)
+      .overrideProvider(AUTH_INSTANCE)
+      .useValue({})
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
