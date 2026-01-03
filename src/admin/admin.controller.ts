@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 import type { AuthSession } from '@/auth/auth.service';
@@ -25,11 +25,4 @@ export class AdminController {
     return this.adminService.provisionUser(actorSession ?? null, body);
   }
 
-  @Get('students')
-  @UseGuards(VerifiedUserGuard, RolesGuard)
-  @RequireRoles(['SUPER_ADMIN', 'ADMIN'])
-  async listStudents(@Req() req: Request) {
-    const actorSession = (req as RequestWithSession).authSession;
-    return this.adminService.listStudents(actorSession ?? null);
-  }
 }

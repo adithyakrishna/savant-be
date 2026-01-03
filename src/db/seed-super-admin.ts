@@ -15,7 +15,9 @@ type RequiredSeedEnv = {
   SUPER_ADMIN_LAST_NAME: string;
 };
 
-function requireSeedEnv(env: ReturnType<typeof validateEnv>): RequiredSeedEnv {
+export function requireSeedEnv(
+  env: ReturnType<typeof validateEnv>,
+): RequiredSeedEnv {
   const missing: string[] = [];
   const superAdminEmail = env.SUPER_ADMIN_EMAIL;
   const superAdminPassword = env.SUPER_ADMIN_PASSWORD;
@@ -37,7 +39,7 @@ function requireSeedEnv(env: ReturnType<typeof validateEnv>): RequiredSeedEnv {
   };
 }
 
-async function seedSuperAdmin() {
+export async function seedSuperAdmin() {
   const env = validateEnv(process.env);
   const seedEnv = requireSeedEnv(env);
   const sslEnabled = env.DB_SSL;
@@ -102,6 +104,7 @@ async function seedSuperAdmin() {
       userId = createdUser.id;
     }
 
+    /* istanbul ignore next */
     if (!userId) {
       throw new Error('Failed to resolve super admin user id');
     }
@@ -162,7 +165,10 @@ async function seedSuperAdmin() {
   }
 }
 
-seedSuperAdmin().catch((error) => {
-  console.error('Super admin seed failed:', error);
-  process.exitCode = 1;
-});
+/* istanbul ignore next */
+if (process.env.NODE_ENV !== 'test') {
+  seedSuperAdmin().catch((error) => {
+    console.error('Super admin seed failed:', error);
+    process.exitCode = 1;
+  });
+}

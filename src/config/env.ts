@@ -17,7 +17,7 @@ export const envSchema = z.object({
   DB_CONN_TIMEOUT_MS: z.coerce.number().int().positive().default(2000),
   DB_SSL: booleanString,
   DB_LOG_QUERIES: booleanString,
-  BETTER_AUTH_BASE_URL: z.string().url().optional().or(z.literal('')),
+  BETTER_AUTH_BASE_URL: z.url().optional().or(z.literal('')),
   BETTER_AUTH_BASE_PATH: z.string().min(1).default('/auth'),
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_JWT_ISSUER: z.string().min(1).default('savant-be'),

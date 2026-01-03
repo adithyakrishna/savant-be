@@ -102,7 +102,10 @@ export class AdminService {
         .where(eq(user.id, userId));
 
       if (!personRow.email) {
-        await tx.update(people).set({ email }).where(eq(people.id, personRow.id));
+        await tx
+          .update(people)
+          .set({ email })
+          .where(eq(people.id, personRow.id));
       }
 
       if (payload.role === 'STUDENT') {
@@ -138,10 +141,7 @@ export class AdminService {
         },
       ];
 
-      await tx
-        .insert(roleAssignments)
-        .values(roleRows)
-        .onConflictDoNothing();
+      await tx.insert(roleAssignments).values(roleRows).onConflictDoNothing();
     });
 
     await this.authService.issueEmailVerificationToken({ email });
@@ -160,31 +160,5 @@ export class AdminService {
       role: payload.role,
       scopeId,
     };
-  }
-
-  async listStudents(actorSession: AuthSession) {
-    if (!actorSession?.user) {
-      throw new ForbiddenException('Not authenticated');
-    }
-
-    return this.db
-      .select({
-        personId: people.id,
-        userId: user.id,
-        firstName: people.firstName,
-        lastName: people.lastName,
-        email: people.email,
-        scopeId: roleAssignments.scopeId,
-      })
-      .from(roleAssignments)
-      .innerJoin(user, eq(roleAssignments.userId, user.id))
-      .innerJoin(people, eq(user.personId, people.id))
-      .where(
-        and(
-          eq(roleAssignments.role, 'STUDENT'),
-          eq(roleAssignments.scopeId, DEFAULT_SCOPE_ID),
-          eq(people.isDeleted, false),
-        ),
-      );
   }
 }
