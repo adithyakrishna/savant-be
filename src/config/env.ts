@@ -6,7 +6,9 @@ const booleanString = z
   .transform((value) => value === 'true');
 
 export const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'test', 'production'])
+    .default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
   DATABASE_URL: z.string().min(1),
   DB_POOL_MIN: z.coerce.number().int().nonnegative().default(0),
@@ -21,6 +23,10 @@ export const envSchema = z.object({
   BETTER_AUTH_JWT_ISSUER: z.string().min(1).default('savant-be'),
   BETTER_AUTH_JWT_AUDIENCE: z.string().min(1).default('savant-clients'),
   BETTER_AUTH_JWT_ACCESS_TTL: z.string().min(1).default('15m'),
+  SUPER_ADMIN_EMAIL: z.email().optional(),
+  SUPER_ADMIN_PASSWORD: z.string().min(8).optional(),
+  SUPER_ADMIN_FIRST_NAME: z.string().min(1).optional(),
+  SUPER_ADMIN_LAST_NAME: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -1,6 +1,8 @@
 import type { Env } from '@/config/env';
 import type { DrizzleDb } from '@/db/db.types';
 import * as schema from '@/db/schema';
+import { storeVerificationToken } from '@/auth/verification-token.store';
+import { storePasswordResetToken } from '@/auth/password-reset-token.store';
 
 export async function createAuth(db: DrizzleDb, env: Env) {
   const [{ betterAuth }, { drizzleAdapter }, { bearer }, { jwt }] =
@@ -19,6 +21,21 @@ export async function createAuth(db: DrizzleDb, env: Env) {
       provider: 'pg',
       schema,
     }),
+    emailAndPassword: {
+      enabled: true,
+      requireEmailVerification: true,
+      disableSignUp: true,
+      sendResetPassword: async ({ user, token, url }) => {
+        storePasswordResetToken(user.email, token, url);
+      },
+    },
+    emailVerification: {
+      sendOnSignUp: true,
+      sendOnSignIn: true,
+      sendVerificationEmail: async ({ user, token }) => {
+        storeVerificationToken(user.email, token);
+      },
+    },
     plugins: [
       jwt({
         jwt: {
@@ -32,5 +49,6 @@ export async function createAuth(db: DrizzleDb, env: Env) {
       }),
       bearer(),
     ],
+    disabledPaths: ['/send-verification-email'],
   });
 }

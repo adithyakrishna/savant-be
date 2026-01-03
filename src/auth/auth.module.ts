@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from '@/auth/auth.controller';
+import { AuthDevController } from '@/auth/auth-dev.controller';
 import { AUTH_INSTANCE } from '@/auth/auth.constants';
 import { createAuth } from '@/auth/better-auth.config';
 import { AuthService } from '@/auth/auth.service';
@@ -11,7 +12,7 @@ import { DrizzleDb } from '@/db/db.types';
 
 @Module({
   imports: [ConfigModule, DatabaseModule],
-  controllers: [AuthController],
+  controllers: [AuthController, AuthDevController],
   providers: [
     {
       provide: AUTH_INSTANCE,

@@ -6,7 +6,7 @@ import { AuthService } from '@/auth/auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @All('*')
+  @All('*path')
   async handle(@Req() req: Request, @Res() res: Response): Promise<void> {
     await this.authService.handle(req, res);
   }
