@@ -36,6 +36,13 @@
       "when": 1766964000000,
       "tag": "0004_rbac",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1767471462219,
+      "tag": "0005_timestamps-with-tz",
+      "breakpoints": true
     }
   ]
 }

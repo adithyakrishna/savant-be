@@ -3,15 +3,31 @@ import type { DrizzleDb } from '@/db/db.types';
 import * as schema from '@/db/schema';
 import { storeVerificationToken } from '@/auth/verification-token.store';
 import { storePasswordResetToken } from '@/auth/password-reset-token.store';
+import { betterAuth } from 'better-auth/minimal';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { bearer } from 'better-auth/plugins/bearer';
+import { jwt } from 'better-auth/plugins/jwt';
 
-export async function createAuth(db: DrizzleDb, env: Env) {
-  const [{ betterAuth }, { drizzleAdapter }, { bearer }, { jwt }] =
-    await Promise.all([
-      import('better-auth/minimal'),
-      import('better-auth/adapters/drizzle'),
-      import('better-auth/plugins/bearer'),
-      import('better-auth/plugins/jwt'),
-    ]);
+type AuthFactories = {
+  betterAuth: typeof betterAuth;
+  drizzleAdapter: typeof drizzleAdapter;
+  bearer: typeof bearer;
+  jwt: typeof jwt;
+};
+
+const defaultFactories: AuthFactories = {
+  betterAuth,
+  drizzleAdapter,
+  bearer,
+  jwt,
+};
+
+export async function createAuth(
+  db: DrizzleDb,
+  env: Env,
+  factories: AuthFactories = defaultFactories,
+) {
+  const { betterAuth, drizzleAdapter, bearer, jwt } = factories;
 
   return betterAuth({
     baseURL: env.BETTER_AUTH_BASE_URL || undefined,

@@ -11,56 +11,90 @@ Base URL: `http://localhost:<PORT>` where `<PORT>` defaults to `3000`.
      curl http://localhost:3000/
      ```
 
-## Users
+## Students
 
-1) `GET /users`
+1) `GET /students`
+   - Requires verified session with `SUPER_ADMIN` or `ADMIN` role.
    - Query params:
      - `includeDeleted` (optional, `true|false`)
    - Example:
      ```bash
-     curl "http://localhost:3000/users?includeDeleted=false"
+     curl "http://localhost:3000/students?includeDeleted=false" \
+       -H "Authorization: Bearer <access-token>"
      ```
 
-2) `GET /users/:id`
+2) `GET /students/:personId`
+   - Requires verified session with `SUPER_ADMIN`/`ADMIN`, or `STUDENT` for own profile.
    - Path params:
-     - `id` (string)
+     - `personId` (string)
    - Example:
      ```bash
-     curl http://localhost:3000/users/abc12345
+     curl http://localhost:3000/students/person_123 \
+       -H "Authorization: Bearer <access-token>"
      ```
 
-3) `POST /users`
+3) `POST /students`
+   - Requires verified session with `SUPER_ADMIN` or `ADMIN` role.
    - Body (JSON):
-     - `name` (string, required)
+     - `firstName` (string, required)
+     - `lastName` (string, required)
      - `email` (string | null, optional; empty string is treated as null)
+     - `phone` (string, optional)
+     - `avatar` (string, optional)
+     - `addressLine1` (string, optional)
+     - `addressLine2` (string, optional)
+     - `city` (string, optional)
+     - `state` (string, optional)
+     - `postalCode` (string, optional)
+     - `country` (string, optional)
+     - `lat` (number, optional)
+     - `lng` (number, optional)
+     - `dob` (string, optional)
+     - `gender` (string, optional)
+     - `learningGoal` (string, optional)
+     - `intendedSubject` (string, optional)
+     - `leadId` (string, optional)
    - Example:
      ```bash
-     curl -X POST http://localhost:3000/users \
+     curl -X POST http://localhost:3000/students \
        -H "Content-Type: application/json" \
-       -d '{"name":"Ada Lovelace","email":"ada@example.com"}'
+       -H "Authorization: Bearer <access-token>" \
+       -d '{"firstName":"Ada","lastName":"Lovelace","email":"ada@example.com"}'
      ```
 
-4) `PATCH /users/:id`
+4) `PATCH /students/:personId`
+   - Requires verified session with `SUPER_ADMIN`/`ADMIN`, or `STUDENT` for own profile.
    - Path params:
-     - `id` (string)
-   - Body (JSON):
-     - `name` (string, optional)
-     - `email` (string | null, optional; empty string is treated as null)
+     - `personId` (string)
+   - Body (JSON): any `POST /students` fields.
    - Example:
      ```bash
-     curl -X PATCH http://localhost:3000/users/abc12345 \
+     curl -X PATCH http://localhost:3000/students/person_123 \
        -H "Content-Type: application/json" \
-       -d '{"name":"Ada Byron"}'
+       -H "Authorization: Bearer <access-token>" \
+       -d '{"learningGoal":"Algebra"}'
      ```
 
-5) `DELETE /users/:id`
+5) `DELETE /students/:personId`
+   - Requires verified session with `SUPER_ADMIN` or `ADMIN` role.
    - Path params:
-     - `id` (string)
+     - `personId` (string)
    - Query params:
      - `hard` (optional, `true|false`)
    - Example:
      ```bash
-     curl -X DELETE "http://localhost:3000/users/abc12345?hard=false"
+     curl -X DELETE "http://localhost:3000/students/person_123?hard=false" \
+       -H "Authorization: Bearer <access-token>"
+     ```
+
+6) `POST /students/:personId/restore`
+   - Requires verified session with `SUPER_ADMIN` or `ADMIN` role.
+   - Path params:
+     - `personId` (string)
+   - Example:
+     ```bash
+     curl -X POST http://localhost:3000/students/person_123/restore \
+       -H "Authorization: Bearer <access-token>"
      ```
 
 ## Admin
@@ -91,14 +125,6 @@ Base URL: `http://localhost:<PORT>` where `<PORT>` defaults to `3000`.
        -d '{"personId":"person_123","role":"STUDENT"}'
      ```
 
-2) `GET /admin/students`
-   - Requires verified user session with `SUPER_ADMIN` or `ADMIN` role.
-   - Returns students linked to the `people` table for the `GLOBAL` scope.
-   - Example:
-     ```bash
-     curl http://localhost:3000/admin/students \
-       -H "Authorization: Bearer <access-token>"
-     ```
 
 ## Auth (Better Auth)
 

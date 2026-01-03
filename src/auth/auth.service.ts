@@ -17,6 +17,20 @@ export type AuthSession = {
   };
 } | null;
 
+export const handlerFactory = {
+  async create(auth: Auth) {
+    const { toNodeHandler } = await import('better-auth/node');
+    return toNodeHandler(auth);
+  },
+};
+
+export const verificationTokenFactory = {
+  async create(secret: string, email: string, expiresIn?: number) {
+    const { createEmailVerificationToken } = await import('better-auth/api');
+    return createEmailVerificationToken(secret, email, undefined, expiresIn);
+  },
+};
+
 @Injectable()
 export class AuthService {
   private handler?: (req: IncomingMessage, res: ServerResponse) => Promise<void> | void;
@@ -27,8 +41,7 @@ export class AuthService {
     (req: IncomingMessage, res: ServerResponse) => Promise<void> | void
   > {
     if (!this.handler) {
-      const { toNodeHandler } = await import('better-auth/node');
-      this.handler = toNodeHandler(this.auth);
+      this.handler = await handlerFactory.create(this.auth);
     }
     return this.handler;
   }
@@ -84,11 +97,9 @@ export class AuthService {
 
   async issueEmailVerificationToken(payload: { email: string }) {
     const ctx = await this.auth.$context;
-    const { createEmailVerificationToken } = await import('better-auth/api');
-    const token = await createEmailVerificationToken(
+    const token = await verificationTokenFactory.create(
       ctx.secret,
       payload.email,
-      undefined,
       ctx.options.emailVerification?.expiresIn,
     );
     storeVerificationToken(payload.email, token);

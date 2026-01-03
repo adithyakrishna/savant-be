@@ -4,18 +4,18 @@ import { DEFAULT_SCOPE_ID } from '@/rbac/rbac.types';
 const baseProvisionUserSchema = z.object({
   personId: z.string().min(1),
   email: z.email().optional(),
-  emailVerificationCallbackURL: z.string().url().optional(),
+  emailVerificationCallbackURL: z.url().optional(),
   scopeId: z.string().min(1).default(DEFAULT_SCOPE_ID),
 });
 
 const studentProvisionUserSchema = baseProvisionUserSchema.extend({
   role: z.literal('STUDENT'),
-  passwordResetRedirectTo: z.string().url(),
+  passwordResetRedirectTo: z.url(),
 });
 
 const staffProvisionUserSchema = baseProvisionUserSchema.extend({
   role: z.enum(['ADMIN', 'STAFF', 'TEACHER', 'PARENT']),
-  passwordResetRedirectTo: z.string().url().optional(),
+  passwordResetRedirectTo: z.url().optional(),
 });
 
 export const provisionUserSchema = z.discriminatedUnion('role', [

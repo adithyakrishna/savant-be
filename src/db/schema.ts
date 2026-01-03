@@ -52,7 +52,9 @@ export const roleAssignments = pgTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     role: roleEnum('role').notNull(),
     scopeId: text('scope_id').default('GLOBAL').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     uniqueIndex('role_assignments_user_role_scope_unique').on(
@@ -76,9 +78,11 @@ export const studentProfiles = pgTable('student_profiles', {
   intendedSubject: text('intended_subject'),
   leadId: text('lead_id'),
   isDeleted: boolean('is_deleted').default(false).notNull(),
-  deletedAt: timestamp('deleted_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),
@@ -88,8 +92,10 @@ export const parentProfiles = pgTable('parent_profiles', {
   personId: text('person_id')
     .primaryKey()
     .references(() => people.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),
@@ -102,9 +108,11 @@ export const staffProfiles = pgTable('staff_profiles', {
   bio: text('bio'),
   active: boolean('active').default(true).notNull(),
   isDeleted: boolean('is_deleted').default(false).notNull(),
-  deletedAt: timestamp('deleted_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),
@@ -122,7 +130,9 @@ export const guardianships = pgTable(
       .references(() => people.id, { onDelete: 'cascade' }),
     relationship: text('relationship'),
     isPrimary: boolean('is_primary').default(false).notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     uniqueIndex('guardianships_student_parent_unique').on(
