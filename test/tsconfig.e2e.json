@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "nodenext",
+    "target": "ES2023",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "baseUrl": "..",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
+}
