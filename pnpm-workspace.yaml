@@ -1,2 +1,6 @@
 onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@prisma/client'
+  - better-sqlite3
   - esbuild
+  - unrs-resolver
