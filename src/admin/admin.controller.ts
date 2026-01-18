@@ -1,5 +1,6 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 import type { AuthSession } from '@/auth/auth.service';
 import { AdminService } from '@/admin/admin.service';
@@ -10,6 +11,8 @@ import { RolesGuard, VerifiedUserGuard } from '@/rbac/rbac.guard';
 
 type RequestWithSession = Request & { authSession?: AuthSession };
 
+@ApiTags('Admin')
+@ApiBearerAuth()
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
@@ -17,6 +20,7 @@ export class AdminController {
   @Post('provision-user')
   @UseGuards(VerifiedUserGuard, RolesGuard)
   @RequireRoles(['SUPER_ADMIN', 'ADMIN'])
+  @ApiOperation({ summary: 'Provision a user and assign a role' })
   async provisionUser(
     @Req() req: Request,
     @Body(new ZodValidationPipe(provisionUserSchema)) body: ProvisionUserDto,
@@ -24,5 +28,4 @@ export class AdminController {
     const actorSession = (req as RequestWithSession).authSession;
     return this.adminService.provisionUser(actorSession ?? null, body);
   }
-
 }

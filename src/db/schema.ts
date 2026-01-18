@@ -161,6 +161,95 @@ export const orgDesignations = pgTable(
   ],
 );
 
+export const courseDifficultyEnum = pgEnum('course_difficulty', [
+  'FOUNDATION',
+  'BEGINNER',
+  'INTERMEDIATE',
+  'ADVANCED',
+]);
+
+export const instruments = pgTable(
+  'instruments',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    description: text('description'),
+    orgId: text('org_id')
+      .notNull()
+      .references(() => orgs.id, { onDelete: 'cascade' }),
+    isDeleted: boolean('is_deleted').default(false).notNull(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex('instruments_name_unique').on(table.name),
+    index('instruments_org_idx').on(table.orgId),
+    index('instruments_deleted_idx').on(table.isDeleted),
+  ],
+);
+
+export const courses = pgTable(
+  'courses',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    difficulty: courseDifficultyEnum('difficulty')
+      .default('FOUNDATION')
+      .notNull(),
+    description: text('description'),
+    instrumentId: text('instrument_id').references(() => instruments.id, {
+      onDelete: 'set null',
+    }),
+    orgId: text('org_id')
+      .notNull()
+      .references(() => orgs.id, { onDelete: 'cascade' }),
+    isDeleted: boolean('is_deleted').default(false).notNull(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex('courses_name_unique').on(table.name),
+    index('courses_org_idx').on(table.orgId),
+    index('courses_instrument_idx').on(table.instrumentId),
+    index('courses_deleted_idx').on(table.isDeleted),
+  ],
+);
+
+export const courseTeachers = pgTable(
+  'course_teachers',
+  {
+    courseId: text('course_id')
+      .notNull()
+      .references(() => courses.id, { onDelete: 'cascade' }),
+    teacherPersonId: text('teacher_person_id')
+      .notNull()
+      .references(() => people.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex('course_teachers_course_teacher_unique').on(
+      table.courseId,
+      table.teacherPersonId,
+    ),
+    index('course_teachers_course_idx').on(table.courseId),
+    index('course_teachers_teacher_idx').on(table.teacherPersonId),
+  ],
+);
+
 export const employeeOrgAssignments = pgTable(
   'employee_org_assignments',
   {

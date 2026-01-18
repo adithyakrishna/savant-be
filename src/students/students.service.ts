@@ -8,7 +8,11 @@ import {
 import type { AuthSession } from '@/auth/auth.service';
 import { DEFAULT_SCOPE_ID } from '@/rbac/rbac.types';
 import { RbacService } from '@/rbac/rbac.service';
-import type { CreateStudentDto, Student, UpdateStudentDto } from '@/students/students.types';
+import type {
+  CreateStudentInput,
+  Student,
+  UpdateStudentInput,
+} from '@/students/students.types';
 import { StudentsRepository } from '@/students/students.repository';
 
 @Injectable()
@@ -47,7 +51,10 @@ export class StudentsService {
     throw new ForbiddenException('Insufficient privileges');
   }
 
-  async createOne(session: AuthSession, payload: CreateStudentDto): Promise<Student> {
+  async createOne(
+    session: AuthSession,
+    payload: CreateStudentInput,
+  ): Promise<Student> {
     await this.requireAdmin(session);
 
     if (!payload?.firstName || !payload?.lastName) {
@@ -64,7 +71,10 @@ export class StudentsService {
     }
   }
 
-  async getAll(session: AuthSession, includeDeleted = false): Promise<Student[]> {
+  async getAll(
+    session: AuthSession,
+    includeDeleted = false,
+  ): Promise<Student[]> {
     await this.requireAdmin(session);
     return this.studentsRepository.findAll(includeDeleted);
   }
@@ -81,7 +91,7 @@ export class StudentsService {
   async updateOne(
     session: AuthSession,
     personId: string,
-    payload: UpdateStudentDto,
+    payload: UpdateStudentInput,
   ): Promise<Student> {
     await this.requireAdminOrSelf(session, personId);
 

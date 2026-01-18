@@ -9,6 +9,9 @@ import { DatabaseModule } from '@/db/db.module';
 import { StudentsModule } from '@/students/students.module';
 import { OrgModule } from '@/org/org.module';
 import { AttendanceModule } from '@/attendance/attendance.module';
+import { StaffModule } from '@/staff/staff.module';
+import { InstrumentsModule } from '@/instruments/instruments.module';
+import { CoursesModule } from '@/courses/courses.module';
 
 @Module({
   imports: [
@@ -22,6 +25,9 @@ import { AttendanceModule } from '@/attendance/attendance.module';
     StudentsModule,
     OrgModule,
     AttendanceModule,
+    StaffModule,
+    InstrumentsModule,
+    CoursesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

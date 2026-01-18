@@ -5,9 +5,9 @@ import { DRIZZLE_DB } from '@/db/db.constants';
 import type { DrizzleDb } from '@/db/db.types';
 import { people, studentProfiles, user } from '@/db/schema';
 import type {
-  CreateStudentDto,
+  CreateStudentInput,
   Student,
-  UpdateStudentDto,
+  UpdateStudentInput,
 } from '@/students/students.types';
 
 const emailVerifiedExpression = sql<boolean>`
@@ -52,14 +52,16 @@ export class StudentsRepository {
     return maybe.code === '23505' && maybe.constraint === 'people_email_unique';
   }
 
-  async create(payload: CreateStudentDto): Promise<Student> {
+  async create(payload: CreateStudentInput): Promise<Student> {
     const normalizedEmail = this.normalizeEmail(payload.email);
 
     if (normalizedEmail) {
       const [existing] = await this.db
         .select({ id: people.id })
         .from(people)
-        .where(and(eq(people.email, normalizedEmail), eq(people.isDeleted, false)))
+        .where(
+          and(eq(people.email, normalizedEmail), eq(people.isDeleted, false)),
+        )
         .limit(1);
 
       if (existing) {
@@ -192,7 +194,10 @@ export class StudentsRepository {
     const resultQuery = includeDeleted
       ? baseQuery
       : baseQuery.where(
-          and(eq(studentProfiles.isDeleted, false), eq(people.isDeleted, false)),
+          and(
+            eq(studentProfiles.isDeleted, false),
+            eq(people.isDeleted, false),
+          ),
         );
 
     const rows = await resultQuery;
@@ -244,7 +249,7 @@ export class StudentsRepository {
 
   async update(
     personId: string,
-    payload: UpdateStudentDto,
+    payload: UpdateStudentInput,
   ): Promise<Student | undefined> {
     const normalizedEmail = this.normalizeEmail(payload.email);
 
@@ -447,7 +452,9 @@ export class StudentsRepository {
 
   async hardDelete(personId: string): Promise<boolean> {
     return this.db.transaction(async (tx) => {
-      await tx.delete(studentProfiles).where(eq(studentProfiles.personId, personId));
+      await tx
+        .delete(studentProfiles)
+        .where(eq(studentProfiles.personId, personId));
       const [removed] = await tx
         .delete(people)
         .where(eq(people.id, personId))

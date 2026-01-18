@@ -1,5 +1,6 @@
 import { IncomingMessage } from 'node:http';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from '@/app.module';
 
 export const AUTH_BASE_PATH = process.env.BETTER_AUTH_BASE_PATH || '/auth';
@@ -49,12 +50,23 @@ export async function bootstrap() {
     }
 
     try {
-      (req as IncomingMessage & { body?: unknown }).body = await readJsonBody(req);
+      (req as IncomingMessage & { body?: unknown }).body =
+        await readJsonBody(req);
       next();
     } catch (error) {
       next(error);
     }
   });
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Savant API')
+    .setDescription('Savant backend API documentation')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('/api-docs', app, swaggerDocument);
 
   await app.listen(process.env.PORT ?? 3000);
 }

@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { z } from 'zod';
 
 export type AttendanceEventType = 'IN' | 'OUT' | 'BREAK_START' | 'BREAK_END';
@@ -11,35 +12,88 @@ export type AttendanceWeekStart =
   | 'SATURDAY'
   | 'SUNDAY';
 
-export interface AttendanceEvent {
+export class AttendanceEvent {
+  @ApiProperty({ example: 'evt_123' })
   id: string;
+
+  @ApiProperty({ example: 'person_123' })
   personId: string;
+
+  @ApiProperty({ enum: ['IN', 'OUT', 'BREAK_START', 'BREAK_END'] })
   eventType: AttendanceEventType;
+
+  @ApiProperty({ example: '2025-01-01T08:30:00.000Z' })
   eventAt: Date;
+
+  @ApiProperty({ example: '2025-01-01T08:31:00.000Z' })
   createdAt: Date;
 }
 
-export interface AttendancePeriodicSummary {
+export class AttendancePeriodicSummary {
+  @ApiProperty({ example: 'sum_123' })
   id: string;
+
+  @ApiProperty({ example: 'person_123' })
   personId: string;
+
+  @ApiProperty({ example: 'ORG-0' })
   orgId: string;
+
+  @ApiProperty({ example: '2025-01-01' })
   periodStart: string;
+
+  @ApiProperty({ example: '2025-01-07' })
   periodEnd: string;
+
+  @ApiProperty({ example: 7 })
   periodDays: number;
+
+  @ApiProperty({ example: 2100 })
   totalMinutes: number;
+
+  @ApiPropertyOptional({ example: '2025-01-01T08:30:00.000Z' })
   firstIn: Date | null;
+
+  @ApiPropertyOptional({ example: '2025-01-07T17:30:00.000Z' })
   lastOut: Date | null;
+
+  @ApiProperty({ enum: ['ABSENT', 'PRESENT', 'PARTIAL'] })
   status: AttendanceStatus;
+
+  @ApiProperty({ example: '2025-01-07T18:00:00.000Z' })
   createdAt: Date;
+
+  @ApiProperty({ example: '2025-01-07T18:10:00.000Z' })
   updatedAt: Date;
 }
 
-export interface AttendanceSettings {
+export class AttendanceSettings {
+  @ApiProperty({ example: 'ORG-0' })
   orgId: string;
+
+  @ApiProperty({ example: 7 })
   periodDays: number;
+
+  @ApiProperty({
+    enum: [
+      'MONDAY',
+      'TUESDAY',
+      'WEDNESDAY',
+      'THURSDAY',
+      'FRIDAY',
+      'SATURDAY',
+      'SUNDAY',
+    ],
+  })
   weekStart: AttendanceWeekStart;
+
+  @ApiPropertyOptional({ example: 'user_123' })
   updatedBy: string | null;
+
+  @ApiProperty({ example: '2025-01-01T00:00:00.000Z' })
   createdAt: Date;
+
+  @ApiProperty({ example: '2025-01-07T00:00:00.000Z' })
   updatedAt: Date;
 }
 
@@ -81,8 +135,54 @@ export const attendanceSettingsSchema = z.object({
   weekStart: weekStartSchema,
 });
 
-export type PunchDto = z.infer<typeof punchSchema>;
-export type AttendanceRangeDto = z.infer<typeof attendanceRangeSchema>;
-export type AttendanceQueryDto = z.infer<typeof attendanceQuerySchema>;
-export type ReportingQueryDto = z.infer<typeof reportingQuerySchema>;
-export type AttendanceSettingsDto = z.infer<typeof attendanceSettingsSchema>;
+export class PunchDto {
+  @ApiProperty({ enum: ['IN', 'OUT', 'BREAK_START', 'BREAK_END'] })
+  eventType: AttendanceEventType;
+
+  @ApiPropertyOptional({
+    example: '2025-01-01T08:30:00.000Z',
+    description: 'Defaults to now when omitted',
+  })
+  eventAt?: string;
+}
+
+export class AttendanceRangeDto {
+  @ApiProperty({ example: '2025-01-01' })
+  startDate: string;
+
+  @ApiProperty({ example: '2025-01-07' })
+  endDate: string;
+}
+
+export class AttendanceQueryDto extends AttendanceRangeDto {
+  @ApiPropertyOptional({ example: 'person_123' })
+  personId?: string;
+}
+
+export class ReportingQueryDto {
+  @ApiPropertyOptional({ example: true })
+  includeReports?: boolean;
+}
+
+export class AttendanceSettingsDto {
+  @ApiProperty({ example: 7 })
+  periodDays: number;
+
+  @ApiProperty({
+    enum: [
+      'MONDAY',
+      'TUESDAY',
+      'WEDNESDAY',
+      'THURSDAY',
+      'FRIDAY',
+      'SATURDAY',
+      'SUNDAY',
+    ],
+  })
+  weekStart: AttendanceWeekStart;
+}
+
+export type PunchInput = z.infer<typeof punchSchema>;
+export type AttendanceRangeInput = z.infer<typeof attendanceRangeSchema>;
+export type AttendanceQueryInput = z.infer<typeof attendanceQuerySchema>;
+export type AttendanceSettingsInput = z.infer<typeof attendanceSettingsSchema>;

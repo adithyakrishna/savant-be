@@ -13,11 +13,11 @@ import type {
   AttendanceEventType,
   AttendanceSettings,
   AttendanceStatus,
-  AttendanceRangeDto,
-  AttendanceQueryDto,
+  AttendanceRangeInput,
+  AttendanceQueryInput,
+  PunchInput,
+  AttendanceSettingsInput,
   AttendanceWeekStart,
-  PunchDto,
-  AttendanceSettingsDto,
 } from '@/attendance/attendance.types';
 import { AttendanceRepository } from '@/attendance/attendance.repository';
 
@@ -46,7 +46,7 @@ function formatDate(date: Date, timeZone: string) {
   return new Intl.DateTimeFormat('en-CA', { timeZone }).format(date);
 }
 
-function parseDateRange(range: AttendanceRangeDto) {
+function parseDateRange(range: AttendanceRangeInput) {
   const start = new Date(range.startDate);
   const end = new Date(range.endDate);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
@@ -151,7 +151,7 @@ export class AttendanceService {
     return this.configService.get('APP_TIMEZONE', { infer: true });
   }
 
-  private parseEventAt(payload: PunchDto) {
+  private parseEventAt(payload: PunchInput) {
     if (payload.eventAt) {
       const parsed = new Date(payload.eventAt);
       if (Number.isNaN(parsed.getTime())) {
@@ -293,10 +293,10 @@ export class AttendanceService {
   }
 
   async punch(
-    session: AuthSession,
+    session: AuthSession | null,
     personId: string,
     orgId: string,
-    payload: PunchDto,
+    payload: PunchInput,
   ) {
     await this.ensureAccess(session, personId, orgId);
 
@@ -315,10 +315,10 @@ export class AttendanceService {
   }
 
   async listEvents(
-    session: AuthSession,
+    session: AuthSession | null,
     personId: string,
     orgId: string,
-    range: AttendanceRangeDto,
+    range: AttendanceRangeInput,
   ) {
     await this.ensureAccess(session, personId, orgId, true);
     const { start, end } = parseDateRange(range);
@@ -326,8 +326,8 @@ export class AttendanceService {
   }
 
   async listSummaries(
-    session: AuthSession,
-    query: AttendanceQueryDto,
+    session: AuthSession | null,
+    query: AttendanceQueryInput,
     orgId: string,
   ) {
     const { startDate, endDate, personId } = query;
@@ -351,8 +351,8 @@ export class AttendanceService {
   }
 
   async listTeamSummaries(
-    session: AuthSession,
-    range: AttendanceRangeDto,
+    session: AuthSession | null,
+    range: AttendanceRangeInput,
     orgId: string,
   ) {
     if (!session?.user?.personId) {
@@ -385,9 +385,9 @@ export class AttendanceService {
   }
 
   async updateSettings(
-    session: AuthSession,
+    session: AuthSession | null,
     orgId: string,
-    payload: AttendanceSettingsDto,
+    payload: AttendanceSettingsInput,
   ) {
     if (!session?.user) {
       throw new ForbiddenException('Not authenticated');
