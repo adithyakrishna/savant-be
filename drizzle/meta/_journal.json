@@ -43,6 +43,20 @@
       "when": 1767471462219,
       "tag": "0005_timestamps-with-tz",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1768688175339,
+      "tag": "0006_useful_johnny_blaze",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1768690200000,
+      "tag": "0007_orgs_periodic_attendance",
+      "breakpoints": true
     }
   ]
 }

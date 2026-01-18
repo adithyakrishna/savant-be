@@ -62,7 +62,11 @@ import {
   users,
 } from '@/db/schema';
 
-import { RBAC_ROLES_KEY, RBAC_SCOPE_KEY, RequireRoles } from '@/rbac/rbac.decorators';
+import {
+  RBAC_ROLES_KEY,
+  RBAC_SCOPE_KEY,
+  RequireRoles,
+} from '@/rbac/rbac.decorators';
 import { RolesGuard, VerifiedUserGuard } from '@/rbac/rbac.guard';
 import { RbacModule } from '@/rbac/rbac.module';
 import { RbacService } from '@/rbac/rbac.service';
@@ -72,7 +76,10 @@ import { StudentsController } from '@/students/students.controller';
 import { StudentsModule } from '@/students/students.module';
 import { StudentsRepository } from '@/students/students.repository';
 import { StudentsService } from '@/students/students.service';
-import { createStudentSchema, updateStudentSchema } from '@/students/students.types';
+import {
+  createStudentSchema,
+  updateStudentSchema,
+} from '@/students/students.types';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -116,7 +123,9 @@ describe('main', () => {
 
   it('detects json content', async () => {
     const { hasJsonContent } = await import('@/main');
-    const req = { headers: { 'content-type': 'application/json; charset=utf-8' } } as IncomingMessage;
+    const req = {
+      headers: { 'content-type': 'application/json; charset=utf-8' },
+    } as IncomingMessage;
     expect(hasJsonContent(req)).toBe(true);
   });
 
@@ -145,7 +154,10 @@ describe('main', () => {
 
   it('skips body parsing for auth path', async () => {
     const { NestFactory } = await import('@nestjs/core');
-    const app = { use: jest.fn(), listen: jest.fn().mockResolvedValue(undefined) };
+    const app = {
+      use: jest.fn(),
+      listen: jest.fn().mockResolvedValue(undefined),
+    };
     (NestFactory.create as jest.Mock).mockResolvedValue(app);
     const main = await import('@/main');
 
@@ -153,13 +165,20 @@ describe('main', () => {
 
     const middleware = app.use.mock.calls[0][0];
     const next = jest.fn();
-    await middleware({ url: '/auth/session', method: 'POST', headers: {} }, {}, next);
+    await middleware(
+      { url: '/auth/session', method: 'POST', headers: {} },
+      {},
+      next,
+    );
     expect(next).toHaveBeenCalledWith();
   });
 
   it('parses json body and assigns req.body', async () => {
     const { NestFactory } = await import('@nestjs/core');
-    const app = { use: jest.fn(), listen: jest.fn().mockResolvedValue(undefined) };
+    const app = {
+      use: jest.fn(),
+      listen: jest.fn().mockResolvedValue(undefined),
+    };
     (NestFactory.create as jest.Mock).mockResolvedValue(app);
     const main = await import('@/main');
 
@@ -182,7 +201,10 @@ describe('main', () => {
 
   it('bails out for non-json and GET requests', async () => {
     const { NestFactory } = await import('@nestjs/core');
-    const app = { use: jest.fn(), listen: jest.fn().mockResolvedValue(undefined) };
+    const app = {
+      use: jest.fn(),
+      listen: jest.fn().mockResolvedValue(undefined),
+    };
     (NestFactory.create as jest.Mock).mockResolvedValue(app);
     const main = await import('@/main');
 
@@ -190,7 +212,11 @@ describe('main', () => {
 
     const next = jest.fn();
     await app.use.mock.calls[0][0](
-      { url: '/students', method: 'GET', headers: { 'content-type': 'application/json' } },
+      {
+        url: '/students',
+        method: 'GET',
+        headers: { 'content-type': 'application/json' },
+      },
       {},
       next,
     );
@@ -205,7 +231,10 @@ describe('main', () => {
 
   it('passes errors from body parsing to next', async () => {
     const { NestFactory } = await import('@nestjs/core');
-    const app = { use: jest.fn(), listen: jest.fn().mockResolvedValue(undefined) };
+    const app = {
+      use: jest.fn(),
+      listen: jest.fn().mockResolvedValue(undefined),
+    };
     (NestFactory.create as jest.Mock).mockResolvedValue(app);
     const main = await import('@/main');
 
@@ -228,7 +257,9 @@ describe('main', () => {
   it('reads json body from stream', async () => {
     const { readJsonBody } = await import('@/main');
     const req = new PassThrough() as IncomingMessage;
-    req.headers = { 'content-type': 'application/json' } as IncomingMessage['headers'];
+    req.headers = {
+      'content-type': 'application/json',
+    } as IncomingMessage['headers'];
 
     const promise = readJsonBody(req);
     req.emit('data', Buffer.from('{\"ok\":true}'));
@@ -240,7 +271,9 @@ describe('main', () => {
   it('returns undefined when body is empty', async () => {
     const { readJsonBody } = await import('@/main');
     const req = new PassThrough() as IncomingMessage;
-    req.headers = { 'content-type': 'application/json' } as IncomingMessage['headers'];
+    req.headers = {
+      'content-type': 'application/json',
+    } as IncomingMessage['headers'];
 
     const promise = readJsonBody(req);
     req.emit('end');
@@ -251,7 +284,9 @@ describe('main', () => {
   it('returns undefined for empty json payload', async () => {
     const { readJsonBody } = await import('@/main');
     const req = new PassThrough() as IncomingMessage;
-    req.headers = { 'content-type': 'application/json' } as IncomingMessage['headers'];
+    req.headers = {
+      'content-type': 'application/json',
+    } as IncomingMessage['headers'];
 
     const promise = readJsonBody(req);
     req.emit('data', Buffer.from(''));
@@ -263,7 +298,9 @@ describe('main', () => {
   it('rejects invalid json', async () => {
     const { readJsonBody } = await import('@/main');
     const req = new PassThrough() as IncomingMessage;
-    req.headers = { 'content-type': 'application/json' } as IncomingMessage['headers'];
+    req.headers = {
+      'content-type': 'application/json',
+    } as IncomingMessage['headers'];
 
     const promise = readJsonBody(req);
     req.emit('data', Buffer.from('{bad json}'));
@@ -275,7 +312,10 @@ describe('main', () => {
   it('auto-bootstraps when not in test env', async () => {
     process.env.NODE_ENV = 'production';
     const { NestFactory } = await import('@nestjs/core');
-    const app = { use: jest.fn(), listen: jest.fn().mockResolvedValue(undefined) };
+    const app = {
+      use: jest.fn(),
+      listen: jest.fn().mockResolvedValue(undefined),
+    };
     (NestFactory.create as jest.Mock).mockResolvedValue(app);
 
     await import('@/main');
@@ -287,7 +327,10 @@ describe('main', () => {
   it('uses PORT when provided', async () => {
     process.env.PORT = '4000';
     const { NestFactory } = await import('@nestjs/core');
-    const app = { use: jest.fn(), listen: jest.fn().mockResolvedValue(undefined) };
+    const app = {
+      use: jest.fn(),
+      listen: jest.fn().mockResolvedValue(undefined),
+    };
     (NestFactory.create as jest.Mock).mockResolvedValue(app);
 
     const main = await import('@/main');
@@ -299,11 +342,16 @@ describe('main', () => {
 
 describe('AdminController', () => {
   it('passes session and body to service', async () => {
-    const adminService = { provisionUser: jest.fn().mockResolvedValue({}) } as any;
+    const adminService = {
+      provisionUser: jest.fn().mockResolvedValue({}),
+    } as any;
     const controller = new AdminController(adminService);
     const req = { authSession: { user: { id: 'u1' } } } as any;
 
-    await controller.provisionUser(req, { role: 'ADMIN', personId: 'p1' } as any);
+    await controller.provisionUser(req, {
+      role: 'ADMIN',
+      personId: 'p1',
+    } as any);
 
     expect(adminService.provisionUser).toHaveBeenCalledWith(req.authSession, {
       role: 'ADMIN',
@@ -312,11 +360,16 @@ describe('AdminController', () => {
   });
 
   it('falls back to null session when missing', async () => {
-    const adminService = { provisionUser: jest.fn().mockResolvedValue({}) } as any;
+    const adminService = {
+      provisionUser: jest.fn().mockResolvedValue({}),
+    } as any;
     const controller = new AdminController(adminService);
     const req = {} as any;
 
-    await controller.provisionUser(req, { role: 'ADMIN', personId: 'p1' } as any);
+    await controller.provisionUser(req, {
+      role: 'ADMIN',
+      personId: 'p1',
+    } as any);
 
     expect(adminService.provisionUser).toHaveBeenCalledWith(null, {
       role: 'ADMIN',
@@ -733,8 +786,13 @@ describe('AuthModule', () => {
   it('creates auth instance with config values', async () => {
     const { AuthModule } = require('@/auth/auth.module');
     const { createAuth } = require('@/auth/better-auth.config');
-    const providers = Reflect.getMetadata(MODULE_METADATA.PROVIDERS, AuthModule) as any[];
-    const authProvider = providers.find((provider) => provider.provide === AUTH_INSTANCE);
+    const providers = Reflect.getMetadata(
+      MODULE_METADATA.PROVIDERS,
+      AuthModule,
+    ) as any[];
+    const authProvider = providers.find(
+      (provider) => provider.provide === AUTH_INSTANCE,
+    );
 
     const configService = {
       get: jest.fn((key: string) => {
@@ -806,10 +864,14 @@ describe('AuthService', () => {
       storeVerificationToken: jest.fn(),
     }));
 
-    ({ AuthService: AuthServiceImpl, handlerFactory, verificationTokenFactory } =
-      require('@/auth/auth.service'));
-    ({ storeVerificationToken: storeVerificationTokenMock } =
-      require('@/auth/verification-token.store'));
+    ({
+      AuthService: AuthServiceImpl,
+      handlerFactory,
+      verificationTokenFactory,
+    } = require('@/auth/auth.service'));
+    ({
+      storeVerificationToken: storeVerificationTokenMock,
+    } = require('@/auth/verification-token.store'));
 
     jest.clearAllMocks();
   });
@@ -837,7 +899,9 @@ describe('AuthService', () => {
   });
 
   it('maps request headers to getSession', async () => {
-    auth.api.getSession.mockResolvedValue({ user: { id: 'u1', emailVerified: true } });
+    auth.api.getSession.mockResolvedValue({
+      user: { id: 'u1', emailVerified: true },
+    });
     const service = new AuthServiceImpl(auth);
 
     const session = await service.getSession({
@@ -849,7 +913,9 @@ describe('AuthService', () => {
   });
 
   it('ignores falsy header values', async () => {
-    auth.api.getSession.mockResolvedValue({ user: { id: 'u1', emailVerified: true } });
+    auth.api.getSession.mockResolvedValue({
+      user: { id: 'u1', emailVerified: true },
+    });
     const service = new AuthServiceImpl(auth);
 
     await service.getSession({
@@ -900,14 +966,19 @@ describe('AuthService', () => {
       service.issueEmailVerificationToken({ email: 'user@example.com' }),
     ).resolves.toBe('token-123');
 
-    expect(storeVerificationTokenMock).toHaveBeenCalledWith('user@example.com', 'token-123');
+    expect(storeVerificationTokenMock).toHaveBeenCalledWith(
+      'user@example.com',
+      'token-123',
+    );
   });
 
   it('requests password reset', async () => {
     const service = new AuthServiceImpl(auth);
     auth.api.requestPasswordReset.mockResolvedValue({ ok: true });
 
-    const result = await service.requestPasswordReset({ email: 'user@example.com' });
+    const result = await service.requestPasswordReset({
+      email: 'user@example.com',
+    });
     expect(result).toEqual({ ok: true });
   });
 
@@ -917,7 +988,11 @@ describe('AuthService', () => {
   });
 
   it('creates verification token via factory', async () => {
-    const token = await verificationTokenFactory.create('secret', 'user@example.com', 3600);
+    const token = await verificationTokenFactory.create(
+      'secret',
+      'user@example.com',
+      3600,
+    );
     expect(typeof token).toBe('string');
   });
 });
@@ -941,14 +1016,18 @@ describe('createAuth', () => {
 
   it('configures better-auth and token callbacks', async () => {
     const { createAuth } = require('@/auth/better-auth.config');
-    const { storePasswordResetToken: storePasswordResetTokenMock } =
-      require('@/auth/password-reset-token.store');
-    const { storeVerificationToken: storeVerificationTokenMock } =
-      require('@/auth/verification-token.store');
+    const {
+      storePasswordResetToken: storePasswordResetTokenMock,
+    } = require('@/auth/password-reset-token.store');
+    const {
+      storeVerificationToken: storeVerificationTokenMock,
+    } = require('@/auth/verification-token.store');
     const { betterAuth } = jest.requireMock('better-auth/minimal') as {
       betterAuth: jest.Mock;
     };
-    const { drizzleAdapter } = jest.requireMock('better-auth/adapters/drizzle') as {
+    const { drizzleAdapter } = jest.requireMock(
+      'better-auth/adapters/drizzle',
+    ) as {
       drizzleAdapter: jest.Mock;
     };
     const { bearer } = jest.requireMock('better-auth/plugins/bearer') as {
@@ -965,6 +1044,8 @@ describe('createAuth', () => {
       BETTER_AUTH_JWT_ISSUER: 'issuer',
       BETTER_AUTH_JWT_AUDIENCE: 'aud',
       BETTER_AUTH_JWT_ACCESS_TTL: '15m',
+      APP_TIMEZONE: 'UTC',
+      HRMS_ALLOWED_ROLES: 'SUPER_ADMIN,ADMIN',
     };
 
     await createAuth({} as any, env, {
@@ -992,7 +1073,10 @@ describe('createAuth', () => {
       user: { email: 'user@example.com' },
       token: 'v',
     });
-    expect(storeVerificationTokenMock).toHaveBeenCalledWith('user@example.com', 'v');
+    expect(storeVerificationTokenMock).toHaveBeenCalledWith(
+      'user@example.com',
+      'v',
+    );
     expect(config.disabledPaths).toEqual(['/send-verification-email']);
 
     const definePayload = jwt.mock.calls[0][0].jwt.definePayload;
@@ -1015,6 +1099,8 @@ describe('createAuth', () => {
       BETTER_AUTH_JWT_ISSUER: 'issuer',
       BETTER_AUTH_JWT_AUDIENCE: 'aud',
       BETTER_AUTH_JWT_ACCESS_TTL: '15m',
+      APP_TIMEZONE: 'UTC',
+      HRMS_ALLOWED_ROLES: 'SUPER_ADMIN,ADMIN',
     };
 
     await createAuth({} as any, env);
@@ -1046,8 +1132,10 @@ describe('better-auth schema', () => {
     const accountCols = account[Symbol.for('drizzle:ExtraConfigColumns')];
     expect(accountBuilder(accountCols)).toHaveLength(1);
 
-    const verificationBuilder = verification[Symbol.for('drizzle:ExtraConfigBuilder')];
-    const verificationCols = verification[Symbol.for('drizzle:ExtraConfigColumns')];
+    const verificationBuilder =
+      verification[Symbol.for('drizzle:ExtraConfigBuilder')];
+    const verificationCols =
+      verification[Symbol.for('drizzle:ExtraConfigColumns')];
     expect(verificationBuilder(verificationCols)).toHaveLength(1);
   });
 
@@ -1063,10 +1151,14 @@ describe('better-auth schema', () => {
     const userFks = user[Symbol.for('drizzle:PgInlineForeignKeys')] as Array<{
       reference: () => unknown;
     }>;
-    const sessionFks = session[Symbol.for('drizzle:PgInlineForeignKeys')] as Array<{
+    const sessionFks = session[
+      Symbol.for('drizzle:PgInlineForeignKeys')
+    ] as Array<{
       reference: () => unknown;
     }>;
-    const accountFks = account[Symbol.for('drizzle:PgInlineForeignKeys')] as Array<{
+    const accountFks = account[
+      Symbol.for('drizzle:PgInlineForeignKeys')
+    ] as Array<{
       reference: () => unknown;
     }>;
 
@@ -1086,8 +1178,12 @@ describe('better-auth schema', () => {
 
   it('builds relation configs', () => {
     const userConfig = userRelations.config(createTableRelationsHelpers(user));
-    const sessionConfig = sessionRelations.config(createTableRelationsHelpers(session));
-    const accountConfig = accountRelations.config(createTableRelationsHelpers(account));
+    const sessionConfig = sessionRelations.config(
+      createTableRelationsHelpers(session),
+    );
+    const accountConfig = accountRelations.config(
+      createTableRelationsHelpers(account),
+    );
 
     expect(userConfig.sessions.fieldName).toBe('sessions');
     expect(userConfig.accounts.fieldName).toBe('accounts');
@@ -1204,7 +1300,10 @@ describe('DatabaseModule', () => {
   it('creates the PG pool with SSL disabled', async () => {
     const { DatabaseModule } = require('@/db/db.module');
     const { Pool } = require('pg');
-    const providers = Reflect.getMetadata(MODULE_METADATA.PROVIDERS, DatabaseModule) as any[];
+    const providers = Reflect.getMetadata(
+      MODULE_METADATA.PROVIDERS,
+      DatabaseModule,
+    ) as any[];
     const provider = providers.find((item) => item.provide === PG_POOL);
 
     const configService = {
@@ -1230,7 +1329,10 @@ describe('DatabaseModule', () => {
   it('creates drizzle db with logger', async () => {
     const { DatabaseModule } = require('@/db/db.module');
     const { drizzle } = require('drizzle-orm/node-postgres');
-    const providers = Reflect.getMetadata(MODULE_METADATA.PROVIDERS, DatabaseModule) as any[];
+    const providers = Reflect.getMetadata(
+      MODULE_METADATA.PROVIDERS,
+      DatabaseModule,
+    ) as any[];
     const provider = providers.find((item) => item.provide === DRIZZLE_DB);
 
     const configService = {
@@ -1245,13 +1347,19 @@ describe('DatabaseModule', () => {
     const pool = {} as any;
     provider.useFactory(pool, configService);
 
-    expect(drizzle).toHaveBeenCalledWith(pool, expect.objectContaining({ logger: true }));
+    expect(drizzle).toHaveBeenCalledWith(
+      pool,
+      expect.objectContaining({ logger: true }),
+    );
   });
 
   it('enables SSL when configured', async () => {
     const { DatabaseModule } = require('@/db/db.module');
     const { Pool } = require('pg');
-    const providers = Reflect.getMetadata(MODULE_METADATA.PROVIDERS, DatabaseModule) as any[];
+    const providers = Reflect.getMetadata(
+      MODULE_METADATA.PROVIDERS,
+      DatabaseModule,
+    ) as any[];
     const provider = providers.find((item) => item.provide === PG_POOL);
 
     const configService = {
@@ -1298,12 +1406,15 @@ describe('db schema', () => {
     const extraCols = users[Symbol.for('drizzle:ExtraConfigColumns')];
     expect(builder(extraCols)).toHaveLength(1);
 
-    const roleBuilder = roleAssignments[Symbol.for('drizzle:ExtraConfigBuilder')];
+    const roleBuilder =
+      roleAssignments[Symbol.for('drizzle:ExtraConfigBuilder')];
     const roleCols = roleAssignments[Symbol.for('drizzle:ExtraConfigColumns')];
     expect(roleBuilder(roleCols)).toHaveLength(4);
 
-    const guardianBuilder = guardianships[Symbol.for('drizzle:ExtraConfigBuilder')];
-    const guardianCols = guardianships[Symbol.for('drizzle:ExtraConfigColumns')];
+    const guardianBuilder =
+      guardianships[Symbol.for('drizzle:ExtraConfigBuilder')];
+    const guardianCols =
+      guardianships[Symbol.for('drizzle:ExtraConfigColumns')];
     expect(guardianBuilder(guardianCols)).toHaveLength(1);
   });
 
@@ -1314,7 +1425,13 @@ describe('db schema', () => {
   });
 
   it('executes foreign key references', () => {
-    const tables = [roleAssignments, studentProfiles, parentProfiles, staffProfiles, guardianships];
+    const tables = [
+      roleAssignments,
+      studentProfiles,
+      parentProfiles,
+      staffProfiles,
+      guardianships,
+    ];
     tables.forEach((table) => {
       const fks = table[Symbol.for('drizzle:PgInlineForeignKeys')] as Array<{
         reference: () => unknown;
@@ -1393,7 +1510,9 @@ describe('seed-super-admin', () => {
   });
 
   it('requires seed env vars', () => {
-    expect(() => requireSeedEnv({} as any)).toThrow('Missing required seed env vars');
+    expect(() => requireSeedEnv({} as any)).toThrow(
+      'Missing required seed env vars',
+    );
   });
 
   it('seeds when no existing records', async () => {
@@ -1444,7 +1563,12 @@ describe('seed-super-admin', () => {
         .mockReturnValueOnce(makeSelectChain([{ id: 'person-1' }]))
         .mockReturnValueOnce(
           makeSelectChain([
-            { id: 'user-1', personId: 'person-2', emailVerified: false, name: 'Old' },
+            {
+              id: 'user-1',
+              personId: 'person-2',
+              emailVerified: false,
+              name: 'Old',
+            },
           ]),
         )
         .mockReturnValueOnce(makeSelectChain([])),
@@ -1460,9 +1584,9 @@ describe('seed-super-admin', () => {
       internalAdapter: {
         createUser: jest.fn(),
         updateUser: jest.fn().mockResolvedValue(undefined),
-        findAccountByUserId: jest.fn().mockResolvedValue([
-          { providerId: 'credential' },
-        ]),
+        findAccountByUserId: jest
+          .fn()
+          .mockResolvedValue([{ providerId: 'credential' }]),
         linkAccount: jest.fn(),
         updatePassword: jest.fn().mockResolvedValue(undefined),
       },
@@ -1513,9 +1637,9 @@ describe('seed-super-admin', () => {
       internalAdapter: {
         createUser: jest.fn(),
         updateUser: jest.fn(),
-        findAccountByUserId: jest.fn().mockResolvedValue([
-          { providerId: 'credential' },
-        ]),
+        findAccountByUserId: jest
+          .fn()
+          .mockResolvedValue([{ providerId: 'credential' }]),
         linkAccount: jest.fn(),
         updatePassword: jest.fn().mockResolvedValue(undefined),
       },
@@ -1565,7 +1689,9 @@ describe('seed-super-admin', () => {
 
     createAuth.mockResolvedValue({ $context: Promise.resolve(ctx) });
 
-    await expect(seedSuperAdmin()).rejects.toThrow('Failed to create super admin auth user');
+    await expect(seedSuperAdmin()).rejects.toThrow(
+      'Failed to create super admin auth user',
+    );
     expect(poolEnd).toHaveBeenCalled();
   });
 });
@@ -1586,8 +1712,14 @@ class TestController {
 
 describe('RequireRoles', () => {
   it('sets roles and scope metadata', () => {
-    const roles = Reflect.getMetadata(RBAC_ROLES_KEY, TestController.prototype.handler);
-    const scope = Reflect.getMetadata(RBAC_SCOPE_KEY, TestController.prototype.handler);
+    const roles = Reflect.getMetadata(
+      RBAC_ROLES_KEY,
+      TestController.prototype.handler,
+    );
+    const scope = Reflect.getMetadata(
+      RBAC_SCOPE_KEY,
+      TestController.prototype.handler,
+    );
 
     expect(roles).toEqual(['ADMIN']);
     expect(scope).toBe('SCOPE');
@@ -1610,7 +1742,9 @@ describe('Rbac guards', () => {
   };
 
   it('VerifiedUserGuard rejects unauthenticated', async () => {
-    const authService = { getSession: jest.fn().mockResolvedValue(null) } as any;
+    const authService = {
+      getSession: jest.fn().mockResolvedValue(null),
+    } as any;
     const rbacService = { requireVerifiedUser: jest.fn() } as any;
     const guard = new VerifiedUserGuard(authService, rbacService);
 
@@ -1621,7 +1755,9 @@ describe('Rbac guards', () => {
 
   it('VerifiedUserGuard sets session on request', async () => {
     const session = { user: { id: 'u1', emailVerified: true } } as any;
-    const authService = { getSession: jest.fn().mockResolvedValue(session) } as any;
+    const authService = {
+      getSession: jest.fn().mockResolvedValue(session),
+    } as any;
     const rbacService = { requireVerifiedUser: jest.fn() } as any;
     const guard = new VerifiedUserGuard(authService, rbacService);
     const req: any = {};
@@ -1633,7 +1769,9 @@ describe('Rbac guards', () => {
   it('RolesGuard allows when no roles are required', async () => {
     const { Reflector } = await import('@nestjs/core');
     const reflector = new Reflector();
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce(undefined as any);
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValueOnce(undefined as any);
     const guard = new RolesGuard({} as any, {} as any, reflector);
 
     await expect(guard.canActivate(makeContext({}))).resolves.toBe(true);
@@ -1649,13 +1787,19 @@ describe('Rbac guards', () => {
       .mockReturnValueOnce(undefined as any);
 
     const authService = { getSession: jest.fn() } as any;
-    const rbacService = { requireRole: jest.fn().mockResolvedValue(new Set()) } as any;
+    const rbacService = {
+      requireRole: jest.fn().mockResolvedValue(new Set()),
+    } as any;
     const guard = new RolesGuard(authService, rbacService, reflector);
     const req: any = { authSession: session };
 
     await expect(guard.canActivate(makeContext(req))).resolves.toBe(true);
     expect(authService.getSession).not.toHaveBeenCalled();
-    expect(rbacService.requireRole).toHaveBeenCalledWith(session, ['ADMIN'], 'GLOBAL');
+    expect(rbacService.requireRole).toHaveBeenCalledWith(
+      session,
+      ['ADMIN'],
+      'GLOBAL',
+    );
   });
 
   it('RolesGuard pulls scope metadata', async () => {
@@ -1667,9 +1811,13 @@ describe('Rbac guards', () => {
       .mockReturnValueOnce('SCOPE');
 
     const authService = {
-      getSession: jest.fn().mockResolvedValue({ user: { id: 'u1', emailVerified: true } }),
+      getSession: jest
+        .fn()
+        .mockResolvedValue({ user: { id: 'u1', emailVerified: true } }),
     } as any;
-    const rbacService = { requireRole: jest.fn().mockResolvedValue(new Set()) } as any;
+    const rbacService = {
+      requireRole: jest.fn().mockResolvedValue(new Set()),
+    } as any;
     const guard = new RolesGuard(authService, rbacService, reflector);
     const req: any = {};
 
@@ -1690,8 +1838,12 @@ describe('Rbac guards', () => {
       .mockReturnValueOnce(['ADMIN'])
       .mockReturnValueOnce(undefined as any);
 
-    const authService = { getSession: jest.fn().mockResolvedValue(session) } as any;
-    const rbacService = { requireRole: jest.fn().mockResolvedValue(new Set()) } as any;
+    const authService = {
+      getSession: jest.fn().mockResolvedValue(session),
+    } as any;
+    const rbacService = {
+      requireRole: jest.fn().mockResolvedValue(new Set()),
+    } as any;
     const guard = new RolesGuard(authService, rbacService, reflector);
     const req: any = {};
 
@@ -1710,7 +1862,9 @@ describe('RbacService', () => {
   };
 
   it('returns user scope roles', async () => {
-    const db = { select: jest.fn().mockReturnValue(makeSelectChain([{ role: 'ADMIN' }])) } as any;
+    const db = {
+      select: jest.fn().mockReturnValue(makeSelectChain([{ role: 'ADMIN' }])),
+    } as any;
     const service = new RbacService(db);
 
     const roles = await service.getUserScopeRoles('user-1');
@@ -1719,14 +1873,18 @@ describe('RbacService', () => {
 
   it('requires verified users', () => {
     const service = new RbacService({} as any);
-    expect(() => service.requireVerifiedUser(null)).toThrow(UnauthorizedException);
+    expect(() => service.requireVerifiedUser(null)).toThrow(
+      UnauthorizedException,
+    );
     expect(() =>
       service.requireVerifiedUser({ user: { emailVerified: false } } as any),
     ).toThrow(ForbiddenException);
   });
 
   it('requires a role', async () => {
-    const db = { select: jest.fn().mockReturnValue(makeSelectChain([{ role: 'ADMIN' }])) } as any;
+    const db = {
+      select: jest.fn().mockReturnValue(makeSelectChain([{ role: 'ADMIN' }])),
+    } as any;
     const service = new RbacService(db);
     const session = { user: { id: 'u1', emailVerified: true } } as any;
 
@@ -1735,19 +1893,25 @@ describe('RbacService', () => {
   });
 
   it('rejects missing roles', async () => {
-    const db = { select: jest.fn().mockReturnValue(makeSelectChain([{ role: 'STUDENT' }])) } as any;
+    const db = {
+      select: jest.fn().mockReturnValue(makeSelectChain([{ role: 'STUDENT' }])),
+    } as any;
     const service = new RbacService(db);
     const session = { user: { id: 'u1', emailVerified: true } } as any;
 
-    await expect(service.requireRole(session, ['ADMIN'])).rejects.toBeInstanceOf(
-      ForbiddenException,
-    );
+    await expect(
+      service.requireRole(session, ['ADMIN']),
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('checks provisioning rules', () => {
     const service = new RbacService({} as any);
-    expect(service.canProvisionRole(new Set(['SUPER_ADMIN']), 'ADMIN')).toBe(true);
-    expect(service.canProvisionRole(new Set(['ADMIN']), 'SUPER_ADMIN')).toBe(false);
+    expect(service.canProvisionRole(new Set(['SUPER_ADMIN']), 'ADMIN')).toBe(
+      true,
+    );
+    expect(service.canProvisionRole(new Set(['ADMIN']), 'SUPER_ADMIN')).toBe(
+      false,
+    );
     expect(service.canProvisionRole(new Set(['ADMIN']), 'STAFF')).toBe(true);
     expect(service.canProvisionRole(new Set(['STUDENT']), 'ADMIN')).toBe(false);
   });
@@ -1760,7 +1924,9 @@ describe('StudentsController', () => {
       getOne: jest.fn().mockResolvedValue({}),
       createOne: jest.fn().mockResolvedValue({}),
       updateOne: jest.fn().mockResolvedValue({}),
-      deleteOne: jest.fn().mockResolvedValue({ removed: true, hardDelete: false }),
+      deleteOne: jest
+        .fn()
+        .mockResolvedValue({ removed: true, hardDelete: false }),
       restoreOne: jest.fn().mockResolvedValue({}),
     } as any;
     const controller = new StudentsController(service);
@@ -1768,7 +1934,10 @@ describe('StudentsController', () => {
 
     await controller.getStudents(req, 'true');
     await controller.getStudent(req, 'p1');
-    await controller.createStudent(req, { firstName: 'Ada', lastName: 'Lovelace' } as any);
+    await controller.createStudent(req, {
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+    } as any);
     await controller.updateStudent(req, 'p1', { firstName: 'Ada' } as any);
     await controller.deleteStudent(req, 'p1', 'true');
     await controller.restoreStudent(req, 'p1');
@@ -1776,7 +1945,9 @@ describe('StudentsController', () => {
     expect(service.getAll).toHaveBeenCalledWith(req.authSession, true);
     expect(service.getOne).toHaveBeenCalledWith(req.authSession, 'p1');
     expect(service.createOne).toHaveBeenCalled();
-    expect(service.updateOne).toHaveBeenCalledWith(req.authSession, 'p1', { firstName: 'Ada' });
+    expect(service.updateOne).toHaveBeenCalledWith(req.authSession, 'p1', {
+      firstName: 'Ada',
+    });
     expect(service.deleteOne).toHaveBeenCalledWith(req.authSession, 'p1', true);
     expect(service.restoreOne).toHaveBeenCalledWith(req.authSession, 'p1');
   });
@@ -1787,7 +1958,9 @@ describe('StudentsController', () => {
       getOne: jest.fn().mockResolvedValue({}),
       createOne: jest.fn().mockResolvedValue({}),
       updateOne: jest.fn().mockResolvedValue({}),
-      deleteOne: jest.fn().mockResolvedValue({ removed: true, hardDelete: false }),
+      deleteOne: jest
+        .fn()
+        .mockResolvedValue({ removed: true, hardDelete: false }),
       restoreOne: jest.fn().mockResolvedValue({}),
     } as any;
     const controller = new StudentsController(service);
@@ -1876,7 +2049,11 @@ describe('StudentsRepository', () => {
     const repo = new StudentsRepository(db);
 
     await expect(
-      repo.create({ firstName: 'Ada', lastName: 'Lovelace', email: 'ada@example.com' }),
+      repo.create({
+        firstName: 'Ada',
+        lastName: 'Lovelace',
+        email: 'ada@example.com',
+      }),
     ).rejects.toThrow('EMAIL_EXISTS');
   });
 
@@ -1910,7 +2087,11 @@ describe('StudentsRepository', () => {
     } as any;
 
     const repo = new StudentsRepository(db);
-    const result = await repo.create({ firstName: 'Ada', lastName: 'Lovelace', email: '' });
+    const result = await repo.create({
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      email: '',
+    });
 
     expect(result.personId).toBe('p1');
     expect(result.emailVerified).toBe(false);
@@ -1929,7 +2110,11 @@ describe('StudentsRepository', () => {
 
     const repo = new StudentsRepository(db);
     await expect(
-      repo.create({ firstName: 'Ada', lastName: 'Lovelace', email: 'ada@example.com' }),
+      repo.create({
+        firstName: 'Ada',
+        lastName: 'Lovelace',
+        email: 'ada@example.com',
+      }),
     ).rejects.toThrow('EMAIL_EXISTS');
   });
 
@@ -1943,7 +2128,11 @@ describe('StudentsRepository', () => {
 
     const repo = new StudentsRepository(db);
     await expect(
-      repo.create({ firstName: 'Ada', lastName: 'Lovelace', email: 'ada@example.com' }),
+      repo.create({
+        firstName: 'Ada',
+        lastName: 'Lovelace',
+        email: 'ada@example.com',
+      }),
     ).rejects.toBe('boom');
   });
 
@@ -1973,9 +2162,9 @@ describe('StudentsRepository', () => {
     } as any;
     const repo = new StudentsRepository(db);
 
-    await expect(repo.update('p1', { email: 'ada@example.com' })).rejects.toThrow(
-      'EMAIL_EXISTS',
-    );
+    await expect(
+      repo.update('p1', { email: 'ada@example.com' }),
+    ).rejects.toThrow('EMAIL_EXISTS');
   });
 
   it('updates student fields and returns result', async () => {
@@ -1989,7 +2178,10 @@ describe('StudentsRepository', () => {
     } as any;
     const repo = new StudentsRepository(db);
 
-    const result = await repo.update('p1', { firstName: 'New', dob: '2024-01-01' });
+    const result = await repo.update('p1', {
+      firstName: 'New',
+      dob: '2024-01-01',
+    });
     expect(result?.firstName).toBe('Ada');
     expect(tx.update).toHaveBeenCalledTimes(2);
   });
@@ -2059,7 +2251,9 @@ describe('StudentsRepository', () => {
       update: jest.fn().mockReturnValue(makeUpdateQuery()),
       select: jest.fn().mockReturnValue(makeQuery([sampleRow])),
     } as any;
-    const db = { transaction: jest.fn(async (callback: any) => callback(tx)) } as any;
+    const db = {
+      transaction: jest.fn(async (callback: any) => callback(tx)),
+    } as any;
     const repo = new StudentsRepository(db);
 
     const result = await repo.softDelete('p1');
@@ -2073,7 +2267,9 @@ describe('StudentsRepository', () => {
         .mockReturnValueOnce(makeDeleteQuery([]))
         .mockReturnValueOnce(makeDeleteQuery([{ id: 'p1' }])),
     } as any;
-    const db = { transaction: jest.fn(async (callback: any) => callback(tx)) } as any;
+    const db = {
+      transaction: jest.fn(async (callback: any) => callback(tx)),
+    } as any;
     const repo = new StudentsRepository(db);
 
     await expect(repo.hardDelete('p1')).resolves.toBe(true);
@@ -2084,7 +2280,9 @@ describe('StudentsRepository', () => {
       update: jest.fn().mockReturnValue(makeUpdateQuery()),
       select: jest.fn().mockReturnValue(makeQuery([sampleRow])),
     } as any;
-    const db = { transaction: jest.fn(async (callback: any) => callback(tx)) } as any;
+    const db = {
+      transaction: jest.fn(async (callback: any) => callback(tx)),
+    } as any;
     const repo = new StudentsRepository(db);
 
     const result = await repo.restore('p1');
@@ -2103,17 +2301,21 @@ describe('StudentsService', () => {
     const rbac = { getUserScopeRoles: jest.fn() } as any;
     const service = new StudentsService(repo, rbac);
 
-    await expect(service.getOne(null, 'p1')).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(service.getOne(null, 'p1')).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
   });
 
   it('requires admin to create', async () => {
     const repo = { create: jest.fn() } as any;
-    const rbac = { requireRole: jest.fn().mockRejectedValue(new ForbiddenException()) } as any;
+    const rbac = {
+      requireRole: jest.fn().mockRejectedValue(new ForbiddenException()),
+    } as any;
     const service = new StudentsService(repo, rbac);
 
-    await expect(service.createOne(adminSession, {} as any)).rejects.toBeInstanceOf(
-      ForbiddenException,
-    );
+    await expect(
+      service.createOne(adminSession, {} as any),
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('validates required names', async () => {
@@ -2127,22 +2329,32 @@ describe('StudentsService', () => {
   });
 
   it('maps EMAIL_EXISTS to conflict', async () => {
-    const repo = { create: jest.fn().mockRejectedValue(new Error('EMAIL_EXISTS')) } as any;
+    const repo = {
+      create: jest.fn().mockRejectedValue(new Error('EMAIL_EXISTS')),
+    } as any;
     const rbac = { requireRole: jest.fn().mockResolvedValue(new Set()) } as any;
     const service = new StudentsService(repo, rbac);
 
     await expect(
-      service.createOne(adminSession, { firstName: 'Ada', lastName: 'Lovelace' } as any),
+      service.createOne(adminSession, {
+        firstName: 'Ada',
+        lastName: 'Lovelace',
+      } as any),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('rethrows create errors', async () => {
-    const repo = { create: jest.fn().mockRejectedValue(new Error('boom')) } as any;
+    const repo = {
+      create: jest.fn().mockRejectedValue(new Error('boom')),
+    } as any;
     const rbac = { requireRole: jest.fn().mockResolvedValue(new Set()) } as any;
     const service = new StudentsService(repo, rbac);
 
     await expect(
-      service.createOne(adminSession, { firstName: 'Ada', lastName: 'Lovelace' } as any),
+      service.createOne(adminSession, {
+        firstName: 'Ada',
+        lastName: 'Lovelace',
+      } as any),
     ).rejects.toThrow('boom');
   });
 
@@ -2164,7 +2376,9 @@ describe('StudentsService', () => {
   });
 
   it('allows student to read self', async () => {
-    const repo = { findById: jest.fn().mockResolvedValue({ personId: 'p1' }) } as any;
+    const repo = {
+      findById: jest.fn().mockResolvedValue({ personId: 'p1' }),
+    } as any;
     const rbac = {
       getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['STUDENT'])),
       requireRole: jest.fn(),
@@ -2189,17 +2403,21 @@ describe('StudentsService', () => {
 
   it('throws when student not found', async () => {
     const repo = { findById: jest.fn().mockResolvedValue(undefined) } as any;
-    const rbac = { getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])) } as any;
+    const rbac = {
+      getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])),
+    } as any;
     const service = new StudentsService(repo, rbac);
 
-    await expect(service.getOne(adminSession, 'missing')).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(
+      service.getOne(adminSession, 'missing'),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('rejects empty name update', async () => {
     const repo = { update: jest.fn() } as any;
-    const rbac = { getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])) } as any;
+    const rbac = {
+      getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])),
+    } as any;
     const service = new StudentsService(repo, rbac);
 
     await expect(
@@ -2208,8 +2426,12 @@ describe('StudentsService', () => {
   });
 
   it('maps update EMAIL_EXISTS to conflict', async () => {
-    const repo = { update: jest.fn().mockRejectedValue(new Error('EMAIL_EXISTS')) } as any;
-    const rbac = { getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])) } as any;
+    const repo = {
+      update: jest.fn().mockRejectedValue(new Error('EMAIL_EXISTS')),
+    } as any;
+    const rbac = {
+      getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])),
+    } as any;
     const service = new StudentsService(repo, rbac);
 
     await expect(
@@ -2218,8 +2440,12 @@ describe('StudentsService', () => {
   });
 
   it('rethrows update errors', async () => {
-    const repo = { update: jest.fn().mockRejectedValue(new Error('boom')) } as any;
-    const rbac = { getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])) } as any;
+    const repo = {
+      update: jest.fn().mockRejectedValue(new Error('boom')),
+    } as any;
+    const rbac = {
+      getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])),
+    } as any;
     const service = new StudentsService(repo, rbac);
 
     await expect(
@@ -2229,7 +2455,9 @@ describe('StudentsService', () => {
 
   it('throws when update returns undefined', async () => {
     const repo = { update: jest.fn().mockResolvedValue(undefined) } as any;
-    const rbac = { getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])) } as any;
+    const rbac = {
+      getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])),
+    } as any;
     const service = new StudentsService(repo, rbac);
 
     await expect(
@@ -2238,8 +2466,12 @@ describe('StudentsService', () => {
   });
 
   it('updates a student', async () => {
-    const repo = { update: jest.fn().mockResolvedValue({ personId: 'p1' }) } as any;
-    const rbac = { getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])) } as any;
+    const repo = {
+      update: jest.fn().mockResolvedValue({ personId: 'p1' }),
+    } as any;
+    const rbac = {
+      getUserScopeRoles: jest.fn().mockResolvedValue(new Set(['ADMIN'])),
+    } as any;
     const service = new StudentsService(repo, rbac);
 
     await expect(
@@ -2262,13 +2494,15 @@ describe('StudentsService', () => {
     const rbac = { requireRole: jest.fn().mockResolvedValue(new Set()) } as any;
     const service = new StudentsService(repo, rbac);
 
-    await expect(service.deleteOne(adminSession, 'p1', true)).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(
+      service.deleteOne(adminSession, 'p1', true),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('soft deletes student', async () => {
-    const repo = { softDelete: jest.fn().mockResolvedValue({ personId: 'p1' }) } as any;
+    const repo = {
+      softDelete: jest.fn().mockResolvedValue({ personId: 'p1' }),
+    } as any;
     const rbac = { requireRole: jest.fn().mockResolvedValue(new Set()) } as any;
     const service = new StudentsService(repo, rbac);
 
@@ -2290,7 +2524,9 @@ describe('StudentsService', () => {
   });
 
   it('restores a student', async () => {
-    const repo = { restore: jest.fn().mockResolvedValue({ personId: 'p1' }) } as any;
+    const repo = {
+      restore: jest.fn().mockResolvedValue({ personId: 'p1' }),
+    } as any;
     const rbac = { requireRole: jest.fn().mockResolvedValue(new Set()) } as any;
     const service = new StudentsService(repo, rbac);
 

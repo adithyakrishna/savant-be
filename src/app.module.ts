@@ -7,6 +7,8 @@ import { AdminModule } from '@/admin/admin.module';
 import { validateEnv } from '@/config/env';
 import { DatabaseModule } from '@/db/db.module';
 import { StudentsModule } from '@/students/students.module';
+import { OrgModule } from '@/org/org.module';
+import { AttendanceModule } from '@/attendance/attendance.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { StudentsModule } from '@/students/students.module';
     AuthModule,
     AdminModule,
     StudentsModule,
+    OrgModule,
+    AttendanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -59,6 +59,10 @@ import { DrizzleDb } from '@/db/db.types';
               infer: true,
             },
           ),
+          APP_TIMEZONE: configService.get('APP_TIMEZONE', { infer: true }),
+          HRMS_ALLOWED_ROLES: configService.get('HRMS_ALLOWED_ROLES', {
+            infer: true,
+          }),
         }),
     },
     AuthService,

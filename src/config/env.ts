@@ -27,6 +27,8 @@ export const envSchema = z.object({
   SUPER_ADMIN_PASSWORD: z.string().min(8).optional(),
   SUPER_ADMIN_FIRST_NAME: z.string().min(1).optional(),
   SUPER_ADMIN_LAST_NAME: z.string().min(1).optional(),
+  APP_TIMEZONE: z.string().min(1).default('UTC'),
+  HRMS_ALLOWED_ROLES: z.string().min(1).default('SUPER_ADMIN,ADMIN'),
 });
 
 export type Env = z.infer<typeof envSchema>;

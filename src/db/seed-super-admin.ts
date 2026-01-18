@@ -6,7 +6,13 @@ import { createAuth } from '../auth/better-auth.config';
 import { validateEnv } from '../config/env';
 import { DEFAULT_SCOPE_ID } from '../rbac/rbac.types';
 import * as schema from './schema';
-import { people, roleAssignments, user } from './schema';
+import {
+  employeeOrgAssignments,
+  orgs,
+  people,
+  roleAssignments,
+  user,
+} from './schema';
 
 type RequiredSeedEnv = {
   SUPER_ADMIN_EMAIL: string;
@@ -69,7 +75,8 @@ export async function seedSuperAdmin() {
       .where(and(eq(people.email, email), eq(people.isDeleted, false)))
       .limit(1);
 
-    const personId = existingPerson.length > 0 ? existingPerson[0].id : randomUUID();
+    const personId =
+      existingPerson.length > 0 ? existingPerson[0].id : randomUUID();
 
     if (existingPerson.length === 0) {
       await db.insert(people).values({
@@ -158,6 +165,36 @@ export async function seedSuperAdmin() {
         scopeId: DEFAULT_SCOPE_ID,
       });
     }
+
+    const orgId = 'ORG-0';
+    const existingOrg = await db
+      .select({ id: orgs.id })
+      .from(orgs)
+      .where(eq(orgs.id, orgId))
+      .limit(1);
+
+    if (existingOrg.length === 0) {
+      await db.insert(orgs).values({
+        id: orgId,
+        name: 'Default Org',
+        code: orgId,
+        isActive: true,
+      });
+    }
+
+    await db
+      .insert(employeeOrgAssignments)
+      .values({
+        personId,
+        orgId,
+      })
+      .onConflictDoUpdate({
+        target: employeeOrgAssignments.personId,
+        set: {
+          orgId,
+          updatedAt: new Date(),
+        },
+      });
 
     console.log(`Seeded super admin: ${email}`);
   } finally {
